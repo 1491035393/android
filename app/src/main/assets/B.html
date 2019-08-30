@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style tpye="text/css">
+  body{ margin:0; }
+</style>
+</head>
+
+<body>
+<script>
+setTimeout("a()",500)
+function a(){
+	document.getElementById("image").src="http://192.168.3.3:88/B.jpg?="+ Math.random();
+	document.getElementById("frame1").src="http://192.168.3.3:88/breathB.asp";
+	setTimeout("a()",500);
+}
+</script>
+<img id="image" src="http://192.168.3.3:88/B.jpg" />
+
+</body>
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<iframe id="frame1" src="http://192.168.3.3:88/breathB.asp" ></iframe>
+
+</html>

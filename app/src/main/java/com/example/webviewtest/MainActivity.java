@@ -9,6 +9,7 @@ import android.os.Process;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.StringBuilderPrinter;
 import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.WebSettings;
@@ -21,9 +22,13 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.TimerTask;
@@ -79,13 +84,15 @@ public class MainActivity extends AppCompatActivity {
                 try{
 //                    File input = new File("C:\\Users\\ling\\Desktop\\system.html");
 //                    Document doc = Jsoup.parse(input, "UTF-8");
-                    Document doc = Jsoup.connect("http://47.106.245.23:80/system.html").get();
+                    Document doc = Jsoup.connect("http://192.168.3.3:88/system_B.html").get();
                     Element text = doc.select("p").first();
                     String inf = text.text();
                     Log.e("p's","jsoup=====>>"+inf+" .");
-                    if(inf.equals("ok")){
+                    if(inf.equals("shutdown")){
                         Log.e("jay","that's ok");
 //                        Runtime.getRuntime().exec(new String[]{"su","-c","shutdown"});
+                        sendRequestWithHttpURLConnection();
+
                         shutdown();
                     }
                 }catch (IOException e){
@@ -130,6 +137,46 @@ public class MainActivity extends AppCompatActivity {
                 getDataByJsoup();
             }
         };
+
+    private void sendRequestWithHttpURLConnection(){
+        //开启线程来发起网络请求
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                HttpURLConnection connection = null;
+                BufferedReader reader = null;
+                try{
+                    URL url = new URL("http://192.168.3.3:88/shutdown_sign_B.asp");
+                    connection = (HttpURLConnection)url.openConnection();
+                    connection.setRequestMethod("GET");
+                    connection.setConnectTimeout(8000);
+                    connection.setReadTimeout(8000);
+                    InputStream in = connection.getInputStream();
+                    // 对获取的输入流进行读取
+                    reader = new BufferedReader(new InputStreamReader(in));
+                    StringBuilder response = new StringBuilder();
+                    String line;
+                    while((line = reader.readLine()) != null){
+                        response.append(line);
+                    }
+//                    showResponse();
+                }catch (Exception e){
+                    e.printStackTrace();
+                }finally {
+                    if(reader != null){
+                        try{
+                            reader.close();
+                        }catch(IOException e){
+                            e.printStackTrace();
+                        }
+                    }
+                    if(connection != null){
+                        connection.disconnect();
+                    }
+                }
+            }
+        }).start();
+    }
 
 //    public void onCreate(Bundle savadInstanaceState){
 //        super.onCreate(savadInstanaceState);
